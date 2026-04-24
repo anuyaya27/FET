@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cryoline — Spoilage intelligence for cold chain operators</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=JetBrains+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B1416;
+    --ink-2: #1A272B;
+    --paper: #F2EEE5;
+    --paper-2: #E8E2D4;
+    --frost: #C7D9DC;
+    --ice: #89A7AC;
+    --steel: #4A6368;
+    --warn: #D94F1E;
+    --warn-2: #F2B544;
+    --cool: #2B5F6B;
+    --line: rgba(11, 20, 22, 0.14);
+    --line-2: rgba(11, 20, 22, 0.08);
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Inter Tight', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection { background: var(--ink); color: var(--paper); }
+
+  /* subtle paper grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(11,20,22,0.04) 1px, transparent 0);
+    background-size: 3px 3px;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+
+  .container { max-width: 1320px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 2; }
+
+  /* ============ NAV ============ */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(242, 238, 229, 0.88);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line-2);
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .logo {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 22px; height: 22px;
+    position: relative;
+  }
+  .logo-mark::before, .logo-mark::after {
+    content: '';
+    position: absolute;
+    background: var(--ink);
+  }
+  .logo-mark::before { left: 10px; top: 0; bottom: 0; width: 2px; }
+  .logo-mark::after { top: 10px; left: 0; right: 0; height: 2px; }
+  .logo-mark span {
+    position: absolute; inset: 3px;
+    border: 2px solid var(--ink);
+    transform: rotate(45deg);
+  }
+  .nav-links { display: flex; gap: 36px; align-items: center; }
+  .nav-links a {
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--warn); }
+  .nav-cta {
+    padding: 9px 18px;
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--warn); }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 80px 0 120px;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 80px;
+    align-items: end;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--steel);
+    margin-bottom: 40px;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--steel);
+  }
+  .pulse-dot {
+    width: 8px; height: 8px;
+    background: var(--warn);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  h1.hero-title {
+    font-family: var(--serif);
+    font-size: clamp(56px, 8vw, 116px);
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    margin-bottom: 36px;
+  }
+  h1.hero-title em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--warn);
+  }
+  h1.hero-title .strike {
+    position: relative;
+    display: inline-block;
+  }
+  h1.hero-title .strike::after {
+    content: '';
+    position: absolute;
+    left: -4px; right: -4px;
+    top: 52%;
+    height: 3px;
+    background: var(--warn);
+    transform: skewY(-2deg);
+  }
+
+  .hero-sub {
+    font-size: 19px;
+    line-height: 1.45;
+    color: var(--ink-2);
+    max-width: 520px;
+    margin-bottom: 40px;
+  }
+
+  .hero-ctas {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    padding: 16px 28px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .btn-primary:hover { background: var(--warn); transform: translateY(-1px); }
+  .btn-primary svg { transition: transform 0.2s; }
+  .btn-primary:hover svg { transform: translate(3px, -3px); }
+
+  .btn-ghost {
+    padding: 16px 0;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border-bottom: 1px solid var(--ink);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--warn); border-color: var(--warn); }
+
+  /* Hero stat panel */
+  .stat-panel {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 40px;
+    position: relative;
+    font-family: var(--mono);
+  }
+  .stat-panel::before {
+    content: 'LIVE · DC-07';
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--warn-2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stat-panel::after {
+    content: '';
+    position: absolute;
+    top: 18px; right: 78px;
+    width: 6px; height: 6px;
+    background: var(--warn-2);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid rgba(242, 238, 229, 0.15);
+  }
+  .stat-row:first-of-type { padding-top: 28px; }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(242, 238, 229, 0.6);
+  }
+  .stat-value {
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .stat-value.warn { color: var(--warn-2); }
+  .stat-value.ok { color: var(--frost); }
+
+  .mini-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 36px;
+    margin-top: 20px;
+  }
+  .mini-chart span {
+    flex: 1;
+    background: var(--frost);
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+  .mini-chart span.hot { background: var(--warn); opacity: 1; }
+  .mini-chart span.med { background: var(--warn-2); opacity: 0.9; }
+
+  /* ============ MARQUEE ============ */
+  .marquee {
+    padding: 28px 0;
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+    background: var(--paper-2);
+  }
+  .marquee-inner {
+    display: flex;
+    gap: 80px;
+    animation: scroll 40s linear infinite;
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--steel);
+  }
+  .marquee-inner span::before {
+    content: '◆';
+    margin-right: 80px;
+    color: var(--warn);
+  }
+  @keyframes scroll {
+    to { transform: translateX(-50%); }
+  }
+
+  /* ============ PROBLEM SECTION ============ */
+  section.problem {
+    padding: 140px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--steel);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .section-label::before {
+    content: '';
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--warn);
+    transform: rotate(45deg);
+  }
+
+  .problem-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 100px;
+  }
+
+  h2.section-title {
+    font-family: var(--serif);
+    font-size: clamp(42px, 5.5vw, 72px);
+    font-weight: 300;
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+  }
+  h2.section-title em {
+    font-style: italic;
+    color: var(--warn);
+  }
+
+  .problem-text {
+    font-size: 17px;
+    line-height: 1.65;
+    color: var(--ink-2);
+  }
+  .problem-text p + p { margin-top: 18px; }
+  .problem-text strong { color: var(--ink); font-weight: 600; }
+
+  .stat-big {
+    font-family: var(--serif);
+    font-size: 96px;
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    margin: 40px 0 12px;
+    color: var(--warn);
+  }
+  .stat-big-label {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--steel);
+    max-width: 380px;
+  }
+
+  /* ============ HOW IT WORKS ============ */
+  section.how {
+    padding: 140px 0;
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+  section.how .section-label { color: var(--frost); }
+  section.how .section-label::before { background: var(--warn-2); }
+  section.how h2.section-title { color: var(--paper); }
+  section.how h2.section-title em { color: var(--warn-2); }
+
+  .how-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 100px;
+    align-items: end;
+    margin-bottom: 100px;
+  }
+  .how-lede {
+    font-size: 19px;
+    line-height: 1.55;
+    color: rgba(242, 238, 229, 0.75);
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid rgba(242, 238, 229, 0.15);
+  }
+  .step {
+    padding: 40px 28px 48px 0;
+    border-right: 1px solid rgba(242, 238, 229, 0.15);
+    position: relative;
+  }
+  .step:last-child { border-right: none; padding-right: 0; }
+  .step-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--warn-2);
+    margin-bottom: 28px;
+  }
+  .step-icon {
+    width: 48px; height: 48px;
+    margin-bottom: 28px;
+  }
+  .step h3 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 14px;
+  }
+  .step p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(242, 238, 229, 0.7);
+  }
+
+  /* ============ ACTIONS ============ */
+  section.actions {
+    padding: 140px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .actions-header { margin-bottom: 80px; max-width: 780px; }
+  .actions-header p {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin-top: 32px;
+  }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .action {
+    background: var(--paper);
+    padding: 36px 32px 44px;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .action:hover { background: var(--paper-2); }
+  .action-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 28px;
+  }
+  .action:nth-child(1) .action-tag { background: var(--cool); color: var(--paper); }
+  .action:nth-child(2) .action-tag { background: var(--warn-2); color: var(--ink); }
+  .action:nth-child(3) .action-tag { background: var(--ice); color: var(--ink); }
+  .action:nth-child(4) .action-tag { background: var(--warn); color: var(--paper); }
+
+  .action h3 {
+    font-family: var(--serif);
+    font-size: 30px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .action p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-2);
+    margin-bottom: 28px;
+  }
+  .action-example {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--steel);
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    line-height: 1.6;
+  }
+  .action-example b { color: var(--ink); font-weight: 500; }
+
+  /* ============ PRICING ============ */
+  section.pricing {
+    padding: 140px 0;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-2);
+  }
+  .pricing-header {
+    text-align: center;
+    margin-bottom: 80px;
+  }
+  .pricing-header h2 { margin-bottom: 20px; }
+  .pricing-header p {
+    font-size: 18px;
+    color: var(--ink-2);
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  .tier {
+    background: var(--paper);
+    padding: 40px 36px 48px;
+    border: 1px solid var(--line);
+    position: relative;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .tier:hover { transform: translateY(-4px); border-color: var(--ink); }
+  .tier.featured {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+  .tier.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--warn);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 5px 12px;
+  }
+  .tier-name {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+  .tier-for {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--steel);
+    margin-bottom: 32px;
+  }
+  .tier.featured .tier-for { color: var(--warn-2); }
+
+  .tier-price {
+    font-family: var(--serif);
+    font-size: 64px;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .tier-price sup {
+    font-size: 20px;
+    font-weight: 400;
+    vertical-align: top;
+    margin-right: 2px;
+  }
+  .tier-period {
+    font-size: 13px;
+    color: var(--steel);
+    margin-bottom: 36px;
+  }
+  .tier.featured .tier-period { color: rgba(242, 238, 229, 0.6); }
+
+  .tier-features {
+    list-style: none;
+    margin-bottom: 36px;
+  }
+  .tier-features li {
+    padding: 12px 0;
+    font-size: 14px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: start;
+    gap: 12px;
+  }
+  .tier.featured .tier-features li { border-bottom-color: rgba(242, 238, 229, 0.12); }
+  .tier-features li::before {
+    content: '+';
+    color: var(--warn);
+    font-family: var(--mono);
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  .tier.featured .tier-features li::before { color: var(--warn-2); }
+
+  .tier-cta {
+    display: block;
+    text-align: center;
+    padding: 14px;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s, color 0.2s;
+  }
+  .tier-cta:hover { background: var(--ink); color: var(--paper); }
+  .tier.featured .tier-cta {
+    background: var(--warn);
+    color: var(--paper);
+    border-color: var(--warn);
+  }
+  .tier.featured .tier-cta:hover {
+    background: var(--paper);
+    color: var(--ink);
+    border-color: var(--paper);
+  }
+
+  /* ============ CTA ============ */
+  section.final-cta {
+    padding: 140px 0;
+    text-align: center;
+    position: relative;
+  }
+  .final-cta h2 {
+    font-family: var(--serif);
+    font-size: clamp(52px, 7vw, 96px);
+    font-weight: 300;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    margin-bottom: 40px;
+  }
+  .final-cta h2 em { color: var(--warn); font-style: italic; }
+  .final-cta p {
+    font-size: 18px;
+    color: var(--ink-2);
+    max-width: 520px;
+    margin: 0 auto 48px;
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 60px 0 40px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 60px;
+    margin-bottom: 60px;
+  }
+  footer .logo { color: var(--paper); margin-bottom: 16px; }
+  footer .logo-mark::before, footer .logo-mark::after { background: var(--paper); }
+  footer .logo-mark span { border-color: var(--paper); }
+  .footer-tag {
+    font-size: 13px;
+    color: rgba(242, 238, 229, 0.6);
+    max-width: 300px;
+    line-height: 1.5;
+  }
+  .footer-col h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--warn-2);
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .footer-col a {
+    display: block;
+    color: rgba(242, 238, 229, 0.7);
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 0;
+    transition: color 0.2s;
+  }
+  .footer-col a:hover { color: var(--warn-2); }
+  .footer-bottom {
+    padding-top: 28px;
+    border-top: 1px solid rgba(242, 238, 229, 0.12);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: rgba(242, 238, 229, 0.5);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 960px) {
+    .hero-grid, .problem-grid, .how-header { grid-template-columns: 1fr; gap: 60px; }
+    .steps, .action-grid, .tiers, .footer-grid { grid-template-columns: 1fr; }
+    .step { border-right: none; border-bottom: 1px solid rgba(242, 238, 229, 0.15); padding: 32px 0; }
+    .nav-links { display: none; }
+    .nav-links .nav-cta { display: inline-block; }
+    .container { padding: 0 20px; }
+    section.problem, section.how, section.actions, section.pricing, section.final-cta { padding: 90px 0; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark"><span></span></span>
+      Cryoline
+    </a>
+    <div class="nav-links">
+      <a href="#problem">The problem</a>
+      <a href="#how">How it works</a>
+      <a href="#actions">Actions</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#demo" class="nav-cta">Book a demo</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span class="pulse-dot"></span>Pallet-level spoilage intelligence</div>
+        <h1 class="hero-title">
+          Know what will <span class="strike">spoil</span><br>
+          before <em>it does.</em>
+        </h1>
+        <p class="hero-sub">
+          Cryoline watches every pallet in your cold chain, predicts which inventory will fail in the next 24 to 48 hours, and tells you exactly what to do about it. Reroute, discount, divert, or dispose, before the loss is locked in.
+        </p>
+        <div class="hero-ctas">
+          <a href="#demo" class="btn-primary">
+            Book a 20-minute demo
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H3M11 1V9" stroke="currentColor" stroke-width="1.5"/></svg>
+          </a>
+          <a href="#how" class="btn-ghost">See how it works</a>
+        </div>
+      </div>
+
+      <div class="stat-panel">
+        <div class="stat-row">
+          <span class="stat-label">Critical / 24h</span>
+          <span class="stat-value warn">14</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">At risk / 48h</span>
+          <span class="stat-value warn">47</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Value at risk</span>
+          <span class="stat-value warn">$150.6K</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Recovered / wk</span>
+          <span class="stat-value ok">$84.6K</span>
+        </div>
+        <div class="mini-chart">
+          <span style="height: 20%"></span>
+          <span style="height: 28%"></span>
+          <span style="height: 24%" class="med"></span>
+          <span style="height: 40%" class="med"></span>
+          <span style="height: 36%"></span>
+          <span style="height: 52%" class="med"></span>
+          <span style="height: 48%"></span>
+          <span style="height: 64%" class="hot"></span>
+          <span style="height: 72%" class="hot"></span>
+          <span style="height: 60%" class="med"></span>
+          <span style="height: 80%" class="hot"></span>
+          <span style="height: 92%" class="hot"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee">
+  <div class="marquee-inner">
+    <span>Produce distributors</span>
+    <span>Regional grocers</span>
+    <span>Seafood processors</span>
+    <span>Dairy cooperatives</span>
+    <span>Meat wholesalers</span>
+    <span>Frozen logistics</span>
+    <span>Floral importers</span>
+    <span>Pharma cold chain</span>
+    <span>Produce distributors</span>
+    <span>Regional grocers</span>
+    <span>Seafood processors</span>
+    <span>Dairy cooperatives</span>
+    <span>Meat wholesalers</span>
+    <span>Frozen logistics</span>
+    <span>Floral importers</span>
+    <span>Pharma cold chain</span>
+  </div>
+</div>
+
+<section class="problem" id="problem">
+  <div class="container">
+    <div class="problem-grid">
+      <div>
+        <div class="section-label">The problem</div>
+        <h2 class="section-title">Waste is a <em>lagging</em> indicator.</h2>
+        <div class="stat-big">$35B</div>
+        <div class="stat-big-label">lost annually in U.S. cold chain to preventable spoilage, most of it discovered only after the product is already gone.</div>
+      </div>
+      <div class="problem-text">
+        <p>By the time a pallet of strawberries is pulled from the floor, the loss has already happened. Your team has written it off, your customer has been short-shipped, and no one can explain which link in the chain actually failed.</p>
+        <p>Temperature loggers tell you what happened. Inventory systems tell you what you have. <strong>Nothing tells you what's about to go wrong, at which pallet, with what time to act.</strong></p>
+        <p>Cryoline closes that gap. We ingest your sensor streams, warehouse data, and transit telemetry, score every pallet against its commodity's spoilage curve, and surface the ones that need a decision today, not next Monday.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how" id="how">
+  <div class="container">
+    <div class="how-header">
+      <div>
+        <div class="section-label">How it works</div>
+        <h2 class="section-title">Sensor in.<br>Decision <em>out.</em></h2>
+      </div>
+      <p class="how-lede">
+        Four stages, running continuously. Data flows in from your existing infrastructure. Actionable recommendations flow out to the people who can take them.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01 / INGEST</div>
+        <svg class="step-icon" viewBox="0 0 48 48" fill="none">
+          <rect x="4" y="10" width="40" height="28" stroke="#F2B544" stroke-width="1.5"/>
+          <path d="M4 18H44M12 10V6M36 10V6" stroke="#F2B544" stroke-width="1.5"/>
+          <circle cx="14" cy="28" r="2" fill="#F2B544"/>
+          <circle cx="24" cy="28" r="2" fill="#F2B544"/>
+          <circle cx="34" cy="28" r="2" fill="#F2B544"/>
+        </svg>
+        <h3>Sensors and systems</h3>
+        <p>Temperature, humidity, door events, transit GPS, WMS inventory. We connect to what you already run, no hardware replacement.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02 / MODEL</div>
+        <svg class="step-icon" viewBox="0 0 48 48" fill="none">
+          <path d="M6 38L14 28L22 32L30 18L42 10" stroke="#F2B544" stroke-width="1.5"/>
+          <circle cx="14" cy="28" r="2.5" fill="#F2B544"/>
+          <circle cx="22" cy="32" r="2.5" fill="#F2B544"/>
+          <circle cx="30" cy="18" r="2.5" fill="#F2B544"/>
+          <circle cx="42" cy="10" r="2.5" fill="#F2B544"/>
+          <path d="M6 38H42" stroke="#F2B544" stroke-width="1.5" stroke-dasharray="2 2"/>
+        </svg>
+        <h3>Spoilage scoring</h3>
+        <p>Each pallet scored against its commodity's degradation curve. Our models are trained on commodity-specific shelf-life research plus your historical loss data.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03 / FLAG</div>
+        <svg class="step-icon" viewBox="0 0 48 48" fill="none">
+          <path d="M10 4V44M10 4H36L30 12L36 20H10" stroke="#F2B544" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="36" cy="36" r="5" fill="#D94F1E"/>
+        </svg>
+        <h3>Risk queue</h3>
+        <p>Pallets sorted by time-to-spoil and value at risk. Your team wakes up to a ranked list, not a dashboard they have to interpret.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04 / ACT</div>
+        <svg class="step-icon" viewBox="0 0 48 48" fill="none">
+          <path d="M8 24H40M40 24L30 14M40 24L30 34" stroke="#F2B544" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="8" cy="24" r="4" stroke="#F2B544" stroke-width="1.5"/>
+        </svg>
+        <h3>Recommended action</h3>
+        <p>Reroute, discount, divert, or dispose. Each recommendation comes with its expected recovery value, so your team knows why.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="actions" id="actions">
+  <div class="container">
+    <div class="actions-header">
+      <div class="section-label">Four actions, one decision</div>
+      <h2 class="section-title">Not "there's a problem."<br><em>"Here's what to do."</em></h2>
+      <p>Most monitoring tools stop at the alert. Cryoline runs the math on every recovery path and recommends the one with the highest expected value, factoring in remaining shelf life, transit options, and your downstream customer network.</p>
+    </div>
+    <div class="action-grid">
+      <div class="action">
+        <span class="action-tag">Reroute</span>
+        <h3>Move it closer, fast.</h3>
+        <p>When a pallet's shelf life won't survive the original route, we find a DC or customer within its remaining window and suggest the swap.</p>
+        <div class="action-example">
+          <b>Example:</b> Salmon → rerouted Oakland to Sacramento DC. Recovered $8,940.
+        </div>
+      </div>
+      <div class="action">
+        <span class="action-tag">Discount</span>
+        <h3>Move it on price.</h3>
+        <p>Generate a markdown plan for retail partners before the product visibly turns. Catches value that would otherwise go to dump.</p>
+        <div class="action-example">
+          <b>Example:</b> Strawberries → 40% off, moved same-day. Recovered $3,240.
+        </div>
+      </div>
+      <div class="action">
+        <span class="action-tag">Divert</span>
+        <h3>Send it downstream.</h3>
+        <p>Products that won't survive retail can still work for processors, food service, or secondary markets. We route to partners in your network.</p>
+        <div class="action-example">
+          <b>Example:</b> Ground beef → processor contract. Recovered $5,820 of $7,200.
+        </div>
+      </div>
+      <div class="action">
+        <span class="action-tag">Dispose</span>
+        <h3>Cut losses cleanly.</h3>
+        <p>When recovery math doesn't work, dispose fast and log it. Compliance-ready records for insurance claims and waste reporting.</p>
+        <div class="action-example">
+          <b>Example:</b> Mixed greens → documented disposal. Full audit trail retained.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing">
+  <div class="container">
+    <div class="pricing-header">
+      <div class="section-label" style="justify-content: center;">Pricing</div>
+      <h2 class="section-title">Priced for operators,<br>not <em>enterprise</em>.</h2>
+      <p>No six-figure implementation, no year-long pilot. Connect your sensor feeds in under a week and start flagging risk the same day.</p>
+    </div>
+    <div class="tiers">
+      <div class="tier">
+        <div class="tier-name">Yard</div>
+        <div class="tier-for">Single facility</div>
+        <div class="tier-price"><sup>$</sup>490</div>
+        <div class="tier-period">per month · up to 500 pallets tracked</div>
+        <ul class="tier-features">
+          <li>Real-time risk queue</li>
+          <li>Recommended actions</li>
+          <li>3 sensor integrations</li>
+          <li>Email + Slack alerts</li>
+          <li>30-day history</li>
+        </ul>
+        <a href="#demo" class="tier-cta">Start free trial</a>
+      </div>
+      <div class="tier featured">
+        <div class="tier-name">Network</div>
+        <div class="tier-for">Multi-facility</div>
+        <div class="tier-price"><sup>$</sup>1,490</div>
+        <div class="tier-period">per month · up to 5,000 pallets tracked</div>
+        <ul class="tier-features">
+          <li>Everything in Yard</li>
+          <li>Up to 8 facilities</li>
+          <li>Route-level risk scoring</li>
+          <li>Customer network routing</li>
+          <li>Custom recovery partners</li>
+          <li>12-month history + reporting</li>
+        </ul>
+        <a href="#demo" class="tier-cta">Start free trial</a>
+      </div>
+      <div class="tier">
+        <div class="tier-name">Operator</div>
+        <div class="tier-for">Fleet and 3PL</div>
+        <div class="tier-price">Custom</div>
+        <div class="tier-period">volume pricing · unlimited pallets</div>
+        <ul class="tier-features">
+          <li>Everything in Network</li>
+          <li>Unlimited facilities</li>
+          <li>Custom ML tuning</li>
+          <li>API and data export</li>
+          <li>Dedicated success team</li>
+          <li>SLA + priority support</li>
+        </ul>
+        <a href="#demo" class="tier-cta">Talk to sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta" id="demo">
+  <div class="container">
+    <h2>Stop writing off <em>what you could have saved.</em></h2>
+    <p>20 minutes with our team. Bring one week of your sensor data and we'll show you, on your actual inventory, what Cryoline would have flagged.</p>
+    <a href="#" class="btn-primary">
+      Book your demo
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 11L11 1M11 1H3M11 1V9" stroke="currentColor" stroke-width="1.5"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo">
+          <span class="logo-mark"><span></span></span>
+          Cryoline
+        </div>
+        <p class="footer-tag">Spoilage intelligence for cold chain operators. Pallet-level visibility, commodity-aware models, and recovery recommendations that actually close the loop.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#">Dashboard</a>
+        <a href="#">Integrations</a>
+        <a href="#">API</a>
+        <a href="#">Changelog</a>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Customers</a>
+        <a href="#">Careers</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-col">
+        <h4>Resources</h4>
+        <a href="#">Documentation</a>
+        <a href="#">ROI calculator</a>
+        <a href="#">Research</a>
+        <a href="#">Security</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Cryoline Systems, Inc.</span>
+      <span>SOC 2 Type II · GDPR · HACCP-aligned</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
